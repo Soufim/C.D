@@ -17,6 +17,7 @@ export const TR = ({ className, ...p }: HTMLAttributes<HTMLTableRowElement>) => 
 );
 export const TH = ({ className, ...p }: ThHTMLAttributes<HTMLTableCellElement>) => (
   <th
+    scope="col"
     className={cn(
       'h-10 px-3 text-start align-middle text-xs font-semibold uppercase tracking-wide text-muted-foreground whitespace-nowrap',
       className,
