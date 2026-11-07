@@ -82,7 +82,7 @@ jobs:
       - run: docker compose build
         env: { POSTGRES_PASSWORD: build-only, JWT_ACCESS_SECRET: build-only }
       - name: Scan images (Trivy, open source)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: cdms/api:latest
           severity: HIGH,CRITICAL
