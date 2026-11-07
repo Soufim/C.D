@@ -18,7 +18,11 @@ RUN npm run build -w @cdms/contracts && npm run build -w @cdms/api \
 FROM ${NODE_IMAGE} AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
+# The runtime only needs `node`. Remove the npm/corepack CLIs bundled in the base image:
+# they are unused here and carry their own dependency CVEs (pacote, sigstore, …).
 RUN apt-get update && apt-get install -y --no-install-recommends tini && rm -rf /var/lib/apt/lists/* \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack \
  && mkdir -p /data/storage && chown -R node:node /data
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/packages/contracts/package.json ./packages/contracts/package.json
