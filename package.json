@@ -1,0 +1,32 @@
+{
+  "name": "cdms",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Curriculum Development & Management System (CDMS) — modular monolith",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build": "npm run build -w @cdms/contracts && npm run build -w @cdms/api && npm run build -w @cdms/web",
+    "dev:api": "npm run dev -w @cdms/api",
+    "dev:web": "npm run dev -w @cdms/web",
+    "typecheck": "npm run build -w @cdms/contracts && npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
+    "db:migrate": "npm run db:migrate -w @cdms/api",
+    "db:seed": "npm run db:seed -w @cdms/api",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "overrides": {
+    "multer": "^2.5.0"
+  },
+  "devDependencies": {
+    "drizzle-orm": "^0.45.4"
+  }
+}
