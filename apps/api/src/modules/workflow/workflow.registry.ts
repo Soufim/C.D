@@ -1,7 +1,14 @@
 import type { AnyPgTable, PgColumn } from 'drizzle-orm/pg-core';
 import type { Permission, WorkflowAction, WorkflowEntityType } from '@cdms/contracts';
 import { PERMISSIONS as P } from '@cdms/contracts';
-import { competencies, curricula, frameworks, occupations, templates, units } from '../../database/schema';
+import {
+  competencies,
+  curricula,
+  frameworks,
+  occupations,
+  templates,
+  units,
+} from '../../database/schema';
 
 type WorkflowTable = AnyPgTable & {
   id: PgColumn;
@@ -51,10 +58,42 @@ export const WORKFLOW_REGISTRY: Record<WorkflowEntityType, WorkflowConfig> = {
       restore: P.CURRICULUM_WRITE,
     },
   },
-  unit: { table: units as unknown as WorkflowTable, titleEn: units.titleEn, titleAr: units.titleAr, route: '/units', labelEn: 'Unit', labelAr: 'الوحدة', permissions: catalogPerms },
-  competency: { table: competencies as unknown as WorkflowTable, titleEn: competencies.titleEn, titleAr: competencies.titleAr, route: '/competencies', labelEn: 'Competency', labelAr: 'الجدارة', permissions: catalogPerms },
-  occupation: { table: occupations as unknown as WorkflowTable, titleEn: occupations.titleEn, titleAr: occupations.titleAr, route: '/occupations', labelEn: 'Occupation', labelAr: 'المهنة', permissions: catalogPerms },
-  framework: { table: frameworks as unknown as WorkflowTable, titleEn: frameworks.nameEn, titleAr: frameworks.nameAr, route: '/frameworks', labelEn: 'Framework', labelAr: 'الإطار', permissions: catalogPerms },
+  unit: {
+    table: units as unknown as WorkflowTable,
+    titleEn: units.titleEn,
+    titleAr: units.titleAr,
+    route: '/units',
+    labelEn: 'Unit',
+    labelAr: 'الوحدة',
+    permissions: catalogPerms,
+  },
+  competency: {
+    table: competencies as unknown as WorkflowTable,
+    titleEn: competencies.titleEn,
+    titleAr: competencies.titleAr,
+    route: '/competencies',
+    labelEn: 'Competency',
+    labelAr: 'الجدارة',
+    permissions: catalogPerms,
+  },
+  occupation: {
+    table: occupations as unknown as WorkflowTable,
+    titleEn: occupations.titleEn,
+    titleAr: occupations.titleAr,
+    route: '/occupations',
+    labelEn: 'Occupation',
+    labelAr: 'المهنة',
+    permissions: catalogPerms,
+  },
+  framework: {
+    table: frameworks as unknown as WorkflowTable,
+    titleEn: frameworks.nameEn,
+    titleAr: frameworks.nameAr,
+    route: '/frameworks',
+    labelEn: 'Framework',
+    labelAr: 'الإطار',
+    permissions: catalogPerms,
+  },
   template: {
     table: templates as unknown as WorkflowTable,
     titleEn: templates.nameEn,

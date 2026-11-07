@@ -2,7 +2,14 @@ import { useId, type ReactNode } from 'react';
 import { cloneElement, isValidElement, type ReactElement } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
-import type { FieldErrors, FieldValues, Path, UseFormProps, UseFormRegister, UseFormSetError } from 'react-hook-form';
+import type {
+  FieldErrors,
+  FieldValues,
+  Path,
+  UseFormProps,
+  UseFormRegister,
+  UseFormSetError,
+} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { Label } from '@/components/ui/label';
@@ -14,7 +21,21 @@ import { cn } from '@/lib/utils';
  * Accessible form field: label, control, hint and error are wired with ids so screen readers
  * announce them (WCAG 1.3.1, 3.3.1, 3.3.2). Pass exactly one control element as child.
  */
-export function Field({ label, hint, error, required, children, className }: { label: ReactNode; hint?: ReactNode; error?: string; required?: boolean; children: ReactElement; className?: string }) {
+export function Field({
+  label,
+  hint,
+  error,
+  required,
+  children,
+  className,
+}: {
+  label: ReactNode;
+  hint?: ReactNode;
+  error?: string;
+  required?: boolean;
+  children: ReactElement;
+  className?: string;
+}) {
   const { t } = useTranslation();
   const id = useId();
   const hintId = hint ? `${id}-hint` : undefined;
@@ -31,11 +52,28 @@ export function Field({ label, hint, error, required, children, className }: { l
     <div className={cn('flex flex-col gap-1.5', className)}>
       <Label htmlFor={id}>
         {label}
-        {required ? <span className="text-destructive" aria-hidden> *</span> : <span className="ms-1 text-xs font-normal text-muted-foreground">({t('common.optional')})</span>}
+        {required ? (
+          <span className="text-destructive" aria-hidden>
+            {' '}
+            *
+          </span>
+        ) : (
+          <span className="ms-1 text-xs font-normal text-muted-foreground">
+            ({t('common.optional')})
+          </span>
+        )}
       </Label>
       {control}
-      {hint && <p id={hintId} className="text-xs text-muted-foreground">{hint}</p>}
-      {error && <p id={errId} className="text-xs font-medium text-destructive">{error}</p>}
+      {hint && (
+        <p id={hintId} className="text-xs text-muted-foreground">
+          {hint}
+        </p>
+      )}
+      {error && (
+        <p id={errId} className="text-xs font-medium text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -49,8 +87,26 @@ export const FormGrid = ({ children, className }: { children: ReactNode; classNa
  * English + Arabic inputs for one bilingual attribute. Arabic input is always RTL and
  * English always LTR, independent of the interface language.
  */
-export function BilingualField<T extends FieldValues>({ base, label, labelEn, labelAr, register, errors, required, multiline, rows = 3 }: {
-  base: string; label?: string; labelEn: string; labelAr: string; register: UseFormRegister<T>; errors: FieldErrors<T>; required?: boolean; multiline?: boolean; rows?: number;
+export function BilingualField<T extends FieldValues>({
+  base,
+  label,
+  labelEn,
+  labelAr,
+  register,
+  errors,
+  required,
+  multiline,
+  rows = 3,
+}: {
+  base: string;
+  label?: string;
+  labelEn: string;
+  labelAr: string;
+  register: UseFormRegister<T>;
+  errors: FieldErrors<T>;
+  required?: boolean;
+  multiline?: boolean;
+  rows?: number;
 }) {
   const en = `${base}En` as Path<T>;
   const ar = `${base}Ar` as Path<T>;
@@ -70,9 +126,13 @@ export function BilingualField<T extends FieldValues>({ base, label, labelEn, la
 }
 
 /** Copies server-side field errors (422 problem details) into react-hook-form. */
-export function applyServerErrors<T extends FieldValues>(err: unknown, setError: UseFormSetError<T>): boolean {
+export function applyServerErrors<T extends FieldValues>(
+  err: unknown,
+  setError: UseFormSetError<T>,
+): boolean {
   if (!(err instanceof ApiError) || !err.problem.errors?.length) return false;
-  for (const e of err.problem.errors) setError(e.path as Path<T>, { type: 'server', message: e.message });
+  for (const e of err.problem.errors)
+    setError(e.path as Path<T>, { type: 'server', message: e.message });
   return true;
 }
 
@@ -85,6 +145,9 @@ export const emptyToNull = <T extends Record<string, unknown>>(o: T): T =>
  * validates with). Use this for EVERY form — never hand-write validation rules.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function useZodForm<S extends z.ZodType<any, any>>(schema: S, opts: Omit<UseFormProps<z.input<S>, unknown, z.output<S>>, 'resolver'> = {}) {
+export function useZodForm<S extends z.ZodType<any, any>>(
+  schema: S,
+  opts: Omit<UseFormProps<z.input<S>, unknown, z.output<S>>, 'resolver'> = {},
+) {
   return useForm<z.input<S>, unknown, z.output<S>>({ ...opts, resolver: zodResolver(schema) });
 }

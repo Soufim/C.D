@@ -1,5 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CompetenciesController, OccupationsController, UnitsController } from './catalog.controller';
+import {
+  CompetenciesController,
+  OccupationsController,
+  UnitsController,
+} from './catalog.controller';
 import { CompetenciesService } from './competencies.service';
 import { ImpactService } from './impact.service';
 import { OccupationsService } from './occupations.service';

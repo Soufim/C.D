@@ -1,11 +1,10 @@
 import { z } from 'zod';
-import { code, optionalText, rowVersion, textAr, textEn, uuid } from './common';
+import { code, optionalText, patchSchema, textAr, textEn, uuid } from './common';
 import type { BaseRecord, LinkedRef } from './common';
 import { COMPETENCY_TYPES, OCCUPATION_LEVELS, TEMPLATE_KINDS } from './enums';
 import type { RecordStatus } from './enums';
 
-const withVersion = <T extends z.ZodRawShape>(shape: T) =>
-  z.object(shape).partial().extend({ rowVersion });
+const withVersion = patchSchema;
 
 // ---------------------------------------------------------------- Institutions
 export const institutionSchema = z.object({
@@ -206,14 +205,25 @@ export interface UnitDto extends BaseRecord {
   assessmentEn: string | null;
   assessmentAr: string | null;
   status: RecordStatus;
-  learningOutcomes?: { id: string; code: string; textEn: string; textAr: string; sortOrder: number }[];
+  learningOutcomes?: {
+    id: string;
+    code: string;
+    textEn: string;
+    textAr: string;
+    sortOrder: number;
+  }[];
   competencies?: LinkedRef[];
   curricula?: LinkedRef[];
 }
 
 // ---------------------------------------------------------------- Templates
 export const templateSectionSchema = z.object({
-  key: z.string().trim().min(1).max(50).regex(/^[a-z0-9_]+$/),
+  key: z
+    .string()
+    .trim()
+    .min(1)
+    .max(50)
+    .regex(/^[a-z0-9_]+$/),
   titleEn: z.string().trim().min(1).max(200),
   titleAr: z.string().trim().min(1).max(200),
   guidanceEn: z.string().trim().max(4000).optional().nullable(),

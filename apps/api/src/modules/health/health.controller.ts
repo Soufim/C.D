@@ -12,10 +12,14 @@ import { DB, Database } from '../../database/database.module';
 export class HealthController {
   constructor(@Inject(DB) private readonly db: Database) {}
 
-  @Public() @Get('live')
-  live() { return { status: 'ok' }; }
+  @Public()
+  @Get('live')
+  live() {
+    return { status: 'ok' };
+  }
 
-  @Public() @Get('ready')
+  @Public()
+  @Get('ready')
   async ready() {
     try {
       await this.db.execute(sql`select 1`);

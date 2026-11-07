@@ -64,3 +64,19 @@ export interface LinkedRef {
 
 /** Shape of every PATCH body: a partial record plus the optimistic-lock token. */
 export type UpdateOf<T> = Partial<T> & { rowVersion: number };
+
+/**
+ * Builds a PATCH schema from a create schema's shape: every field optional and — crucially —
+ * WITHOUT defaults, so omitted fields are left untouched instead of being reset.
+ * (zod's .partial() keeps .default() values, which would silently overwrite data.)
+ */
+export function patchSchema<T extends z.ZodRawShape>(shape: T) {
+  const out: Record<string, z.ZodType> = {};
+  for (const [k, v] of Object.entries(shape)) {
+    const inner = v instanceof z.ZodDefault ? (v.unwrap() as z.ZodType) : (v as z.ZodType);
+    out[k] = inner.optional();
+  }
+  return z.object(out).extend({ rowVersion }) as unknown as z.ZodObject<
+    { [K in keyof T]: z.ZodOptional<T[K]> } & { rowVersion: typeof rowVersion }
+  >;
+}

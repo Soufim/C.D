@@ -67,7 +67,13 @@ export const OCCUPATION_LEVELS = [
 ] as const;
 export type OccupationLevel = (typeof OCCUPATION_LEVELS)[number];
 
-export const COMPETENCY_TYPES = ['core', 'technical', 'generic', 'digital', 'entrepreneurial'] as const;
+export const COMPETENCY_TYPES = [
+  'core',
+  'technical',
+  'generic',
+  'digital',
+  'entrepreneurial',
+] as const;
 export type CompetencyType = (typeof COMPETENCY_TYPES)[number];
 
 export const TEMPLATE_KINDS = ['curriculum', 'unit', 'document'] as const;
@@ -76,5 +82,11 @@ export type TemplateKind = (typeof TEMPLATE_KINDS)[number];
 export const LOCALES = ['en', 'ar'] as const;
 export type Locale = (typeof LOCALES)[number];
 
-export const IMPORTABLE_ENTITIES = ['occupation', 'competency', 'unit', 'reference_item', 'institution'] as const;
+export const IMPORTABLE_ENTITIES = [
+  'occupation',
+  'competency',
+  'unit',
+  'reference_item',
+  'institution',
+] as const;
 export type ImportableEntity = (typeof IMPORTABLE_ENTITIES)[number];

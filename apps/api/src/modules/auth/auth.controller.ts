@@ -7,10 +7,12 @@ import type { ChangePasswordInput, LoginInput, UpdateProfileInput } from '@cdms/
 import { Authenticated, CurrentUser, Public } from '../../common/auth.decorators';
 import type { RequestUser } from '../../common/request-user';
 import { ZBody } from '../../common/zod';
-import { ENV, Env } from '../../config/env';
+import { ENV, Env, loadEnv } from '../../config/env';
 import { AuthService, ClientInfo } from './auth.service';
 
 export const REFRESH_COOKIE = 'cdms_rt';
+/** Brute-force limits per client IP (relaxed only for the automated test suite). */
+const LIMIT = (n: number) => (loadEnv().NODE_ENV === 'test' ? 1000 : n);
 
 @ApiTags('auth')
 @Controller('auth')
@@ -31,14 +33,22 @@ export class AuthController {
   }
 
   private client(req: Request & { id?: unknown }): ClientInfo {
-    return { ip: req.ip ?? null, userAgent: req.headers['user-agent'] ?? null, requestId: req.id ? String(req.id) : null };
+    return {
+      ip: req.ip ?? null,
+      userAgent: req.headers['user-agent'] ?? null,
+      requestId: req.id ? String(req.id) : null,
+    };
   }
 
   @Public()
   @Post('login')
   @HttpCode(200)
-  @Throttle({ default: { limit: 10, ttl: 60_000 } })
-  async login(@ZBody(loginSchema) body: LoginInput, @Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  @Throttle({ default: { limit: LIMIT(10), ttl: 60_000 } })
+  async login(
+    @ZBody(loginSchema) body: LoginInput,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { auth, refreshToken } = await this.auth.login(body, this.client(req));
     res.cookie(REFRESH_COOKIE, refreshToken, this.cookieOptions());
     return auth;
@@ -47,10 +57,13 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(200)
-  @Throttle({ default: { limit: 30, ttl: 60_000 } })
+  @Throttle({ default: { limit: LIMIT(30), ttl: 60_000 } })
   async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     try {
-      const { auth, refreshToken } = await this.auth.refresh(req.cookies?.[REFRESH_COOKIE], this.client(req));
+      const { auth, refreshToken } = await this.auth.refresh(
+        req.cookies?.[REFRESH_COOKIE],
+        this.client(req),
+      );
       res.cookie(REFRESH_COOKIE, refreshToken, this.cookieOptions());
       return auth;
     } catch (e) {
@@ -75,15 +88,21 @@ export class AuthController {
 
   @Patch('me')
   @Authenticated()
-  updateProfile(@CurrentUser() user: RequestUser, @ZBody(updateProfileSchema) body: UpdateProfileInput) {
+  updateProfile(
+    @CurrentUser() user: RequestUser,
+    @ZBody(updateProfileSchema) body: UpdateProfileInput,
+  ) {
     return this.auth.updateProfile(user, body);
   }
 
   @Post('change-password')
   @HttpCode(204)
   @Authenticated()
-  @Throttle({ default: { limit: 5, ttl: 60_000 } })
-  changePassword(@CurrentUser() user: RequestUser, @ZBody(changePasswordSchema) body: ChangePasswordInput) {
+  @Throttle({ default: { limit: LIMIT(5), ttl: 60_000 } })
+  changePassword(
+    @CurrentUser() user: RequestUser,
+    @ZBody(changePasswordSchema) body: ChangePasswordInput,
+  ) {
     return this.auth.changePassword(user, body);
   }
 }

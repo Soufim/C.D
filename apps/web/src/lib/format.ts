@@ -12,8 +12,14 @@ export function useFormat() {
   const locale = tag(i18n.language);
   return {
     locale,
-    date: (v: string | Date | null | undefined) => (v ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(v)) : '—'),
-    dateTime: (v: string | Date | null | undefined) => (v ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(v)) : '—'),
+    date: (v: string | Date | null | undefined) =>
+      v ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(v)) : '—',
+    dateTime: (v: string | Date | null | undefined) =>
+      v
+        ? new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(
+            new Date(v),
+          )
+        : '—',
     relative: (v: string | Date) => {
       const diff = (new Date(v).getTime() - Date.now()) / 1000;
       const rtf = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
@@ -23,12 +29,16 @@ export function useFormat() {
       if (abs < 86400) return rtf.format(Math.round(diff / 3600), 'hour');
       return rtf.format(Math.round(diff / 86400), 'day');
     },
-    number: (v: number, digits = 0) => new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(v),
+    number: (v: number, digits = 0) =>
+      new Intl.NumberFormat(locale, { maximumFractionDigits: digits }).format(v),
     bytes: (v: number) => {
       const u = ['B', 'KB', 'MB', 'GB'];
       let i = 0;
       let n = v;
-      while (n >= 1024 && i < u.length - 1) { n /= 1024; i++; }
+      while (n >= 1024 && i < u.length - 1) {
+        n /= 1024;
+        i++;
+      }
       return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(n)} ${u[i]}`;
     },
   };
@@ -49,6 +59,7 @@ export function useBilingual() {
       return primary || other || '';
     },
     /** Picks between two literal strings. */
-    t2: (en: string | null | undefined, arText: string | null | undefined) => (ar ? arText || en : en || arText) ?? '',
+    t2: (en: string | null | undefined, arText: string | null | undefined) =>
+      (ar ? arText || en : en || arText) ?? '',
   };
 }

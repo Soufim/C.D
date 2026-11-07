@@ -6,5 +6,15 @@ import { EmptyState } from '@/components/patterns/states';
 
 export function NotFoundPage() {
   const { t } = useTranslation();
-  return <EmptyState icon={<FileQuestion />} title={t('errors.pageNotFound')} action={<Button asChild><Link to="/">{t('errors.goHome')}</Link></Button>} />;
+  return (
+    <EmptyState
+      icon={<FileQuestion />}
+      title={t('errors.pageNotFound')}
+      action={
+        <Button asChild>
+          <Link to="/">{t('errors.goHome')}</Link>
+        </Button>
+      }
+    />
+  );
 }

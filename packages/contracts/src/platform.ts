@@ -34,7 +34,11 @@ export const importRequestSchema = z.object({
   format: z.enum(['csv', 'json']),
   /** Required when entity = reference_item. */
   listCode: z.string().max(50).optional(),
-  dryRun: z.coerce.boolean().default(true),
+  /** Multipart fields are strings: only an explicit "false"/"0" performs a real import. */
+  dryRun: z
+    .union([z.boolean(), z.string()])
+    .optional()
+    .transform((v) => !(v === false || v === 'false' || v === '0')),
   /** upsert updates draft records with the same code; create skips existing codes. */
   mode: z.enum(['create', 'upsert']).default('create'),
 });
@@ -51,7 +55,10 @@ export interface ImportResult {
 
 // ---------------------------------------------------------------- Dashboard & search
 export interface DashboardStats {
-  counts: Record<'curricula' | 'units' | 'competencies' | 'occupations' | 'templates' | 'institutions', number>;
+  counts: Record<
+    'curricula' | 'units' | 'competencies' | 'occupations' | 'templates' | 'institutions',
+    number
+  >;
   curriculaByStatus: Record<RecordStatus, number>;
   pendingReviews: number;
   myDrafts: number;

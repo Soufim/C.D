@@ -18,9 +18,14 @@ export async function lockForUpdate<T extends Record<string, unknown>>(
   expectedRowVersion: number | undefined,
   label: string,
 ): Promise<T> {
-  const [row] = (await tx.select().from(table as AnyPgTable).where(eq(table.id, id)).for('update')) as T[];
+  const [row] = (await tx
+    .select()
+    .from(table as AnyPgTable)
+    .where(eq(table.id, id))
+    .for('update')) as T[];
   if (!row) throw notFound(label);
-  if (expectedRowVersion !== undefined && row.rowVersion !== expectedRowVersion) throw staleRecord();
+  if (expectedRowVersion !== undefined && row.rowVersion !== expectedRowVersion)
+    throw staleRecord();
   return row;
 }
 
@@ -31,5 +36,9 @@ export function assertEditable(status: RecordStatus) {
 
 /** Standard bookkeeping columns for an update. */
 export function touch(table: Lockable, userId: string) {
-  return { updatedAt: new Date(), updatedById: userId, rowVersion: sql`${table.rowVersion} + 1` } as Record<string, unknown>;
+  return {
+    updatedAt: new Date(),
+    updatedById: userId,
+    rowVersion: sql`${table.rowVersion} + 1`,
+  } as Record<string, unknown>;
 }

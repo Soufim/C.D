@@ -112,7 +112,10 @@ export const roles = pgTable(
     nameAr: varchar('name_ar', { length: 100 }).notNull(),
     description: text('description'),
     isSystem: boolean('is_system').notNull().default(false),
-    permissions: text('permissions').array().notNull().default(sql`'{}'::text[]`),
+    permissions: text('permissions')
+      .array()
+      .notNull()
+      .default(sql`'{}'::text[]`),
     ...timestamps,
   },
   (t) => [uniqueIndex('roles_code_uq').on(sql`lower(${t.code})`)],
@@ -251,9 +254,11 @@ export const occupations = pgTable(
     uniqueIndex('occupations_code_uq').on(sql`lower(${t.code})`),
     index('occupations_parent_idx').on(t.parentId),
     index('occupations_title_trgm').using('gin', sql`${t.titleEn} gin_trgm_ops`),
-    foreignKey({ columns: [t.parentId], foreignColumns: [t.id], name: 'occupations_parent_fk' }).onDelete(
-      'restrict',
-    ),
+    foreignKey({
+      columns: [t.parentId],
+      foreignColumns: [t.id],
+      name: 'occupations_parent_fk',
+    }).onDelete('restrict'),
     check('occupations_not_self_parent', sql`${t.parentId} IS NULL OR ${t.parentId} <> ${t.id}`),
   ],
 );

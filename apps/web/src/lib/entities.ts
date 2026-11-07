@@ -18,10 +18,20 @@ export const entityPath = (type: string | null | undefined, id: string | null | 
 };
 
 const LABEL_KEYS: Record<string, string> = {
-  curriculum: 'nav.curricula', unit: 'nav.units', competency: 'nav.competencies', occupation: 'nav.occupations',
-  framework: 'nav.frameworks', template: 'nav.templates', institution: 'nav.institutions', user: 'nav.users', role: 'nav.roles',
-  reference_list: 'nav.referenceData', reference_item: 'nav.referenceData', file: 'common.files',
+  curriculum: 'nav.curricula',
+  unit: 'nav.units',
+  competency: 'nav.competencies',
+  occupation: 'nav.occupations',
+  framework: 'nav.frameworks',
+  template: 'nav.templates',
+  institution: 'nav.institutions',
+  user: 'nav.users',
+  role: 'nav.roles',
+  reference_list: 'nav.referenceData',
+  reference_item: 'nav.referenceData',
+  file: 'common.files',
 };
 
 /** Translation key for an entity type label, falling back to a generic label. */
-export const entityLabelKey = (type: string | null | undefined): string => (type && LABEL_KEYS[type]) || 'common.details';
+export const entityLabelKey = (type: string | null | undefined): string =>
+  (type && LABEL_KEYS[type]) || 'common.details';

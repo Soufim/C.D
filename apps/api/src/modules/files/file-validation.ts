@@ -31,11 +31,17 @@ export function validateUpload(originalName: string, buf: Buffer): ValidatedFile
   if (!buf.length) return 'File is empty';
   if (buf.length > MAX_UPLOAD_BYTES) return 'File is too large';
   const ext = path.extname(originalName).toLowerCase();
-  const entry = Object.entries(ALLOWED_UPLOAD_TYPES).find(([, exts]) => (exts as readonly string[]).includes(ext));
+  const entry = Object.entries(ALLOWED_UPLOAD_TYPES).find(([, exts]) =>
+    (exts as readonly string[]).includes(ext),
+  );
   if (!entry) return `File type ${ext || '(none)'} is not allowed`;
   const [mimeType] = entry;
   if (!contentMatches(mimeType, buf)) return 'File content does not match its extension';
   // Strip path components and control characters; keep Arabic/Latin letters.
-  const safeName = path.basename(originalName).replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g, '_').slice(0, 200) || `file${ext}`;
+  const safeName =
+    path
+      .basename(originalName)
+      .replace(/[\u0000-\u001f\u007f<>:"/\\|?*]/g, '_')
+      .slice(0, 200) || `file${ext}`;
   return { mimeType, safeName };
 }

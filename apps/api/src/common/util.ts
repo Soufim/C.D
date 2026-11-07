@@ -31,7 +31,12 @@ export function orderBy(
 
 export const countAll = sql<number>`count(*)::int`;
 
-export function paginated<T>(items: T[], total: number, page: number, pageSize: number): Paginated<T> {
+export function paginated<T>(
+  items: T[],
+  total: number,
+  page: number,
+  pageSize: number,
+): Paginated<T> {
   return { items, total, page, pageSize };
 }
 

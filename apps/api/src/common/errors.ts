@@ -1,4 +1,9 @@
-import { ConflictException, ForbiddenException, NotFoundException, UnprocessableEntityException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 
 export const notFound = (entity: string) =>
   new NotFoundException({ title: 'Not found', detail: `${entity} not found` });

@@ -1,10 +1,13 @@
 import { z } from 'zod';
-import { code, rowVersion, uuid } from './common';
+import { code, patchSchema, rowVersion, uuid } from './common';
 import { passwordSchema } from './auth';
 import { ALL_PERMISSIONS } from './permissions';
 
 export const createUserSchema = z.object({
-  email: z.email().max(254).transform((v) => v.toLowerCase()),
+  email: z
+    .email()
+    .max(254)
+    .transform((v) => v.toLowerCase()),
   fullNameEn: z.string().trim().min(1).max(200),
   fullNameAr: z.string().trim().min(1).max(200),
   password: passwordSchema,
@@ -34,7 +37,7 @@ export const roleSchema = z.object({
   permissions: z.array(z.enum(ALL_PERMISSIONS as [string, ...string[]])).max(100),
 });
 export type RoleInput = z.infer<typeof roleSchema>;
-export const updateRoleSchema = roleSchema.partial().extend({ rowVersion });
+export const updateRoleSchema = patchSchema(roleSchema.shape);
 
 export interface UserDto {
   id: string;

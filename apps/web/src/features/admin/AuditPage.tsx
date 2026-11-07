@@ -16,7 +16,8 @@ import { FilterSelect, ListToolbar, Pagination } from '@/components/patterns/dat
 import { ErrorState } from '@/components/patterns/states';
 import { useAudit } from './api';
 
-const fmt = (v: unknown) => (v === null || v === undefined ? '—' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+const fmt = (v: unknown) =>
+  v === null || v === undefined ? '—' : typeof v === 'object' ? JSON.stringify(v) : String(v);
 
 function Changes({ entry }: { entry: AuditEntryDto }) {
   const { t } = useTranslation();
@@ -25,11 +26,29 @@ function Changes({ entry }: { entry: AuditEntryDto }) {
     <div className="flex flex-col gap-2 text-xs">
       {rows.length > 0 && (
         <table className="w-full">
-          <thead><tr className="text-muted-foreground"><th className="py-1 text-start">{t('admin.field')}</th><th className="text-start">{t('admin.before')}</th><th className="text-start">{t('admin.after')}</th></tr></thead>
-          <tbody>{rows.map(([k, v]) => <tr key={k} className="border-t align-top"><td className="py-1 pe-3 font-mono">{k}</td><td className="max-w-xs break-all pe-3 text-destructive">{fmt(v.from)}</td><td className="max-w-xs break-all text-success">{fmt(v.to)}</td></tr>)}</tbody>
+          <thead>
+            <tr className="text-muted-foreground">
+              <th className="py-1 text-start">{t('admin.field')}</th>
+              <th className="text-start">{t('admin.before')}</th>
+              <th className="text-start">{t('admin.after')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(([k, v]) => (
+              <tr key={k} className="border-t align-top">
+                <td className="py-1 pe-3 font-mono">{k}</td>
+                <td className="max-w-xs break-all pe-3 text-destructive">{fmt(v.from)}</td>
+                <td className="max-w-xs break-all text-success">{fmt(v.to)}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       )}
-      {entry.metadata && <pre className="overflow-x-auto rounded bg-muted p-2" dir="ltr">{JSON.stringify(entry.metadata, null, 2)}</pre>}
+      {entry.metadata && (
+        <pre className="overflow-x-auto rounded bg-muted p-2" dir="ltr">
+          {JSON.stringify(entry.metadata, null, 2)}
+        </pre>
+      )}
     </div>
   );
 }
@@ -46,14 +65,53 @@ export function AuditPage() {
       <PageHeader title={t('admin.audit')} description={t('admin.auditSubtitle')} />
       <Card>
         <ListToolbar>
-          <FilterSelect label={t('admin.entity')} value={params.entityType as string} onChange={(v) => set({ entityType: v })}
-            options={['curriculum', 'unit', 'competency', 'occupation', 'framework', 'template', 'institution', 'user', 'role', 'reference_item', 'file'].map((e) => ({ value: e, label: t(entityLabelKey(e)) }))} />
-          <Input aria-label={t('admin.action')} placeholder={`${t('admin.action')} (auth.login…)`} className="h-9 sm:w-56" defaultValue={params.action as string} onKeyDown={(e) => e.key === 'Enter' && set({ action: (e.target as HTMLInputElement).value || undefined })} dir="ltr" />
+          <FilterSelect
+            label={t('admin.entity')}
+            value={params.entityType as string}
+            onChange={(v) => set({ entityType: v })}
+            options={[
+              'curriculum',
+              'unit',
+              'competency',
+              'occupation',
+              'framework',
+              'template',
+              'institution',
+              'user',
+              'role',
+              'reference_item',
+              'file',
+            ].map((e) => ({ value: e, label: t(entityLabelKey(e)) }))}
+          />
+          <Input
+            aria-label={t('admin.action')}
+            placeholder={`${t('admin.action')} (auth.login…)`}
+            className="h-9 sm:w-56"
+            defaultValue={params.action as string}
+            onKeyDown={(e) =>
+              e.key === 'Enter' &&
+              set({ action: (e.target as HTMLInputElement).value || undefined })
+            }
+            dir="ltr"
+          />
         </ListToolbar>
-        {q.error ? <ErrorState error={q.error} /> : (
+        {q.error ? (
+          <ErrorState error={q.error} />
+        ) : (
           <Table>
             <caption className="sr-only">{t('admin.audit')}</caption>
-            <THead><TR><TH>{t('admin.when')}</TH><TH>{t('admin.actor')}</TH><TH>{t('admin.action')}</TH><TH>{t('admin.entity')}</TH><TH>{t('admin.outcome')}</TH><TH><span className="sr-only">{t('admin.changes')}</span></TH></TR></THead>
+            <THead>
+              <TR>
+                <TH>{t('admin.when')}</TH>
+                <TH>{t('admin.actor')}</TH>
+                <TH>{t('admin.action')}</TH>
+                <TH>{t('admin.entity')}</TH>
+                <TH>{t('admin.outcome')}</TH>
+                <TH>
+                  <span className="sr-only">{t('admin.changes')}</span>
+                </TH>
+              </TR>
+            </THead>
             <TBody>
               {q.data?.items.map((e) => {
                 const to = entityPath(e.entityType, e.entityId);
@@ -61,14 +119,64 @@ export function AuditPage() {
                 return (
                   <Fragment key={e.id}>
                     <TR>
-                      <TD className="whitespace-nowrap text-xs tabular"><time dateTime={e.occurredAt}>{f.dateTime(e.occurredAt)}</time></TD>
-                      <TD className="text-sm">{e.actorName ?? '—'}{e.ip && <span className="block font-mono text-[11px] text-muted-foreground">{e.ip}</span>}</TD>
-                      <TD><code className="text-xs">{e.action}</code></TD>
-                      <TD className="text-sm">{e.entityType ? (to ? <Link to={to} className="text-primary hover:underline">{t(entityLabelKey(e.entityType))}</Link> : t(entityLabelKey(e.entityType))) : '—'}</TD>
-                      <TD><Badge tone={e.outcome === 'success' ? 'success' : 'danger'}>{t(`admin.${e.outcome}`)}</Badge></TD>
-                      <TD>{expandable && <button type="button" aria-expanded={open === e.id} aria-label={t('admin.changes')} onClick={() => setOpen(open === e.id ? null : e.id)} className="rounded p-1 hover:bg-muted"><ChevronDown className={cn('size-4 transition-transform', open === e.id && 'rotate-180')} /></button>}</TD>
+                      <TD className="whitespace-nowrap text-xs tabular">
+                        <time dateTime={e.occurredAt}>{f.dateTime(e.occurredAt)}</time>
+                      </TD>
+                      <TD className="text-sm">
+                        {e.actorName ?? '—'}
+                        {e.ip && (
+                          <span className="block font-mono text-[11px] text-muted-foreground">
+                            {e.ip}
+                          </span>
+                        )}
+                      </TD>
+                      <TD>
+                        <code className="text-xs">{e.action}</code>
+                      </TD>
+                      <TD className="text-sm">
+                        {e.entityType ? (
+                          to ? (
+                            <Link to={to} className="text-primary hover:underline">
+                              {t(entityLabelKey(e.entityType))}
+                            </Link>
+                          ) : (
+                            t(entityLabelKey(e.entityType))
+                          )
+                        ) : (
+                          '—'
+                        )}
+                      </TD>
+                      <TD>
+                        <Badge tone={e.outcome === 'success' ? 'success' : 'danger'}>
+                          {t(`admin.${e.outcome}`)}
+                        </Badge>
+                      </TD>
+                      <TD>
+                        {expandable && (
+                          <button
+                            type="button"
+                            aria-expanded={open === e.id}
+                            aria-label={t('admin.changes')}
+                            onClick={() => setOpen(open === e.id ? null : e.id)}
+                            className="rounded p-1 hover:bg-muted"
+                          >
+                            <ChevronDown
+                              className={cn(
+                                'size-4 transition-transform',
+                                open === e.id && 'rotate-180',
+                              )}
+                            />
+                          </button>
+                        )}
+                      </TD>
                     </TR>
-                    {open === e.id && <TR className="bg-muted/30 hover:bg-muted/30"><TD colSpan={6}><Changes entry={e} /></TD></TR>}
+                    {open === e.id && (
+                      <TR className="bg-muted/30 hover:bg-muted/30">
+                        <TD colSpan={6}>
+                          <Changes entry={e} />
+                        </TD>
+                      </TR>
+                    )}
                   </Fragment>
                 );
               })}

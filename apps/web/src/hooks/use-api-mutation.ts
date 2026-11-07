@@ -36,10 +36,16 @@ export function useApiMutation<TData = unknown, TVars = void>(o: Options<TData, 
 
 export function errorMessage(err: unknown, t: (k: string) => string): string {
   if (err instanceof ApiError) {
-    if (err.status === 409 && err.problem.type === 'urn:cdms:edit-conflict') return t('errors.conflict');
+    if (err.status === 409 && err.problem.type === 'urn:cdms:edit-conflict')
+      return t('errors.conflict');
     if (err.status === 403) return err.problem.detail ?? t('errors.forbidden');
     const first = err.problem.errors?.[0];
-    return [err.problem.detail ?? err.problem.title, first && !err.problem.detail ? first.message : null].filter(Boolean).join(' — ');
+    return [
+      err.problem.detail ?? err.problem.title,
+      first && !err.problem.detail ? first.message : null,
+    ]
+      .filter(Boolean)
+      .join(' — ');
   }
   if (err instanceof TypeError) return t('errors.network');
   return t('errors.generic');

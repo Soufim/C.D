@@ -18,8 +18,18 @@ export function createResource<TDto, TInput>(path: string, key: string) {
     keys,
     path,
     useList: (p: Record<string, unknown>, enabled = true) =>
-      useQuery({ queryKey: keys.list(p), queryFn: () => api.get<Paginated<TDto>>(`${path}${qs(p)}`), placeholderData: (prev) => prev, enabled }),
-    useOne: (id: string | undefined) => useQuery({ queryKey: keys.detail(id ?? ''), queryFn: () => api.get<TDto>(`${path}/${id}`), enabled: !!id }),
+      useQuery({
+        queryKey: keys.list(p),
+        queryFn: () => api.get<Paginated<TDto>>(`${path}${qs(p)}`),
+        placeholderData: (prev) => prev,
+        enabled,
+      }),
+    useOne: (id: string | undefined) =>
+      useQuery({
+        queryKey: keys.detail(id ?? ''),
+        queryFn: () => api.get<TDto>(`${path}/${id}`),
+        enabled: !!id,
+      }),
     create: (b: TInput) => api.post<TDto>(path, b),
     update: (id: string, b: UpdateOf<TInput>) => api.patch<TDto>(`${path}/${id}`, b),
   };

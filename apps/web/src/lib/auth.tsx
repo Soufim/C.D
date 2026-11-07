@@ -1,4 +1,12 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react';
 import type { AuthResponse, LoginInput, Permission, SessionUser } from '@cdms/contracts';
 import { api, refreshSession, tokenStore } from './api';
 import { applyLocale } from './i18n';
@@ -52,7 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = useMemo(() => ({ user, status, login, logout, setUser }), [user, status, login, logout]);
+  const value = useMemo(
+    () => ({ user, status, login, logout, setUser }),
+    [user, status, login, logout],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
@@ -68,5 +79,8 @@ export function useAuth() {
  */
 export function useCan() {
   const { user } = useAuth();
-  return useCallback((...perms: Permission[]) => !!user && perms.every((p) => user.permissions.includes(p)), [user]);
+  return useCallback(
+    (...perms: Permission[]) => !!user && perms.every((p) => user.permissions.includes(p)),
+    [user],
+  );
 }

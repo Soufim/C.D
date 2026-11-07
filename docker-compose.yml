@@ -1,0 +1,82 @@
+# CDMS production-style stack: PostgreSQL + API + web (nginx). Only "web" is published.
+# Usage:  cp deploy/.env.example .env  &&  edit secrets  &&  docker compose up -d --build
+# Releases: see docs/operations.md (backup → migrate → up → verify; rollback procedure).
+name: cdms
+
+x-api-env: &api-env
+  NODE_ENV: production
+  DATABASE_URL: postgres://${POSTGRES_USER:-cdms}:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-cdms}
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:?set JWT_ACCESS_SECRET}
+  COOKIE_SECURE: ${COOKIE_SECURE:-1}
+  CORS_ORIGINS: ${PUBLIC_ORIGIN:-https://cdms.example.gov.eg}
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@cdms.local}
+  SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:-}
+  SEED_DEMO_DATA: ${SEED_DEMO_DATA:-0}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-cdms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-cdms}
+      POSTGRES_INITDB_ARGS: --encoding=UTF8 --locale=C.UTF-8
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [backend]
+
+  # One-shot: applies pending migrations and the idempotent seed, then exits.
+  migrate:
+    image: ${REGISTRY:-cdms}/api:${CDMS_VERSION:-latest}
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    command: ['sh', '-c', 'node dist/database/migrate.js && node dist/database/seed.js']
+    environment: *api-env
+    depends_on: { db: { condition: service_healthy } }
+    networks: [backend]
+    restart: 'no'
+
+  api:
+    image: ${REGISTRY:-cdms}/api:${CDMS_VERSION:-latest}
+    build: { context: ., dockerfile: apps/api/Dockerfile }
+    restart: unless-stopped
+    environment: *api-env
+    volumes:
+      - file-storage:/data/storage
+    depends_on:
+      db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    networks: [backend]
+    deploy: { resources: { limits: { memory: 768m } } }
+    logging: { driver: json-file, options: { max-size: '20m', max-file: '10' } }
+
+  web:
+    image: ${REGISTRY:-cdms}/web:${CDMS_VERSION:-latest}
+    build: { context: ., dockerfile: apps/web/Dockerfile }
+    restart: unless-stopped
+    ports:
+      - '${HTTP_BIND:-127.0.0.1}:${HTTP_PORT:-8080}:8080'
+    depends_on: { api: { condition: service_healthy } }
+    read_only: true
+    tmpfs: [/tmp, /var/cache/nginx]
+    security_opt: ['no-new-privileges:true']
+    cap_drop: [ALL]
+    networks: [backend]
+    logging: { driver: json-file, options: { max-size: '20m', max-file: '10' } }
+
+volumes:
+  db-data:
+  file-storage:
+
+networks:
+  backend:

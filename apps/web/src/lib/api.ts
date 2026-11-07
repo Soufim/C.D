@@ -41,7 +41,12 @@ async function parseError(res: Response): Promise<ApiError> {
   } catch {
     /* non-JSON error */
   }
-  return new ApiError({ type: body.type ?? 'about:blank', title: body.title ?? res.statusText, status: res.status, ...body } as ProblemDetails);
+  return new ApiError({
+    type: body.type ?? 'about:blank',
+    title: body.title ?? res.statusText,
+    status: res.status,
+    ...body,
+  } as ProblemDetails);
 }
 
 export function refreshSession(): Promise<AuthResponse | null> {
@@ -85,7 +90,10 @@ async function request<T>(method: string, path: string, body?: unknown, retry = 
 /** Downloads a protected file and triggers the browser save dialog. */
 async function download(path: string, fallbackName = 'download') {
   const doFetch = () =>
-    fetch(`${API_BASE}${path}`, { headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {}, credentials: 'same-origin' });
+    fetch(`${API_BASE}${path}`, {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      credentials: 'same-origin',
+    });
   let res = await doFetch();
   if (res.status === 401 && (await refreshSession())) res = await doFetch();
   if (!res.ok) throw await parseError(res);

@@ -22,7 +22,10 @@ export class NotificationsController {
   @Post('read')
   @HttpCode(204)
   @Authenticated()
-  read(@CurrentUser() user: RequestUser, @Body(new ZodPipe(markReadSchema)) body: z.infer<typeof markReadSchema>) {
+  read(
+    @CurrentUser() user: RequestUser,
+    @Body(new ZodPipe(markReadSchema)) body: z.infer<typeof markReadSchema>,
+  ) {
     return this.svc.markRead(user.id, body.ids);
   }
 }

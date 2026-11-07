@@ -29,7 +29,10 @@ export class ZodPipe<T extends z.ZodType> implements PipeTransform {
 
 function jsonSchema(schema: z.ZodType) {
   try {
-    return z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' }) as Record<string, unknown>;
+    return z.toJSONSchema(schema, { io: 'input', unrepresentable: 'any' }) as Record<
+      string,
+      unknown
+    >;
   } catch {
     return { type: 'object' };
   }
@@ -45,15 +48,17 @@ export const ZBody = (schema: z.ZodType): ParameterDecorator => {
 };
 
 /** Validated query string. */
-export const ZQuery = (schema: z.ZodType): ParameterDecorator => (target, key, index) => {
-  Query(new ZodPipe(schema))(target, key, index);
-  if (key && schema instanceof z.ZodObject) {
-    const desc = Object.getOwnPropertyDescriptor(target, key)!;
-    for (const name of Object.keys(schema.shape)) {
-      applyDecorators(ApiQuery({ name, required: false }))(target, key, desc);
+export const ZQuery =
+  (schema: z.ZodType): ParameterDecorator =>
+  (target, key, index) => {
+    Query(new ZodPipe(schema))(target, key, index);
+    if (key && schema instanceof z.ZodObject) {
+      const desc = Object.getOwnPropertyDescriptor(target, key)!;
+      for (const name of Object.keys(schema.shape)) {
+        applyDecorators(ApiQuery({ name, required: false }))(target, key, desc);
+      }
     }
-  }
-};
+  };
 
 /** UUID route parameter (rejects malformed ids with 400 before reaching the service). */
 export const IdParam = (name = 'id') => Param(name, new ParseUUIDPipe({ version: '4' }));

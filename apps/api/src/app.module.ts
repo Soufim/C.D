@@ -41,12 +41,20 @@ const env = loadEnv();
           res.setHeader('X-Request-Id', id);
           return id;
         },
-        redact: { paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'], censor: '[redacted]' },
-        transport: env.NODE_ENV === 'development' ? { target: 'pino-pretty', options: { singleLine: true } } : undefined,
+        redact: {
+          paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]'],
+          censor: '[redacted]',
+        },
+        transport:
+          env.NODE_ENV === 'development'
+            ? { target: 'pino-pretty', options: { singleLine: true } }
+            : undefined,
         autoLogging: { ignore: (req) => req.url?.startsWith('/api/v1/health') ?? false },
       },
     }),
-    ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: env.NODE_ENV === 'test' ? 10_000 : 300 }]),
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60_000, limit: env.NODE_ENV === 'test' ? 10_000 : 300 },
+    ]),
     DatabaseModule,
     AuditModule,
     AuthModule,

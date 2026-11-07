@@ -2,7 +2,13 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { createHash, randomBytes, randomUUID } from 'node:crypto';
 import { and, eq, isNull, lt, sql } from 'drizzle-orm';
-import type { AuthResponse, ChangePasswordInput, LoginInput, SessionUser, UpdateProfileInput } from '@cdms/contracts';
+import type {
+  AuthResponse,
+  ChangePasswordInput,
+  LoginInput,
+  SessionUser,
+  UpdateProfileInput,
+} from '@cdms/contracts';
 import { ENV, Env } from '../../config/env';
 import { DB, Database } from '../../database/database.module';
 import { refreshTokens, users } from '../../database/schema';
@@ -32,17 +38,31 @@ export class AuthService {
     private readonly audit: AuditService,
   ) {}
 
-  async login(input: LoginInput, client: ClientInfo): Promise<{ auth: AuthResponse; refreshToken: string }> {
+  async login(
+    input: LoginInput,
+    client: ClientInfo,
+  ): Promise<{ auth: AuthResponse; refreshToken: string }> {
     const [user] = await this.db
       .select()
       .from(users)
       .where(sql`lower(${users.email}) = ${input.email}`)
       .limit(1);
-    const actor = user ? { id: user.id, email: user.email, ...client } : { id: '', email: input.email, ...client };
+    const actor = user
+      ? { id: user.id, email: user.email, ...client }
+      : { id: '', email: input.email, ...client };
 
     if (user?.lockedUntil && user.lockedUntil > new Date()) {
-      await this.audit.record(user ? actor : null, { action: 'auth.login', entityType: 'user', entityId: user.id, outcome: 'failure', metadata: { reason: 'locked', email: input.email } });
-      throw new UnauthorizedException({ title: 'Account temporarily locked', detail: 'Too many failed attempts. Try again later.' });
+      await this.audit.record(user ? actor : null, {
+        action: 'auth.login',
+        entityType: 'user',
+        entityId: user.id,
+        outcome: 'failure',
+        metadata: { reason: 'locked', email: input.email },
+      });
+      throw new UnauthorizedException({
+        title: 'Account temporarily locked',
+        detail: 'Too many failed attempts. Try again later.',
+      });
     }
     const ok = await this.passwords.verify(user?.passwordHash, input.password);
     if (!user || !ok || !user.isActive) {
@@ -53,7 +73,9 @@ export class AuthService {
           .update(users)
           .set({
             failedLoginCount: lock ? 0 : failed,
-            lockedUntil: lock ? new Date(Date.now() + this.env.LOGIN_LOCKOUT_MINUTES * 60_000) : user.lockedUntil,
+            lockedUntil: lock
+              ? new Date(Date.now() + this.env.LOGIN_LOCKOUT_MINUTES * 60_000)
+              : user.lockedUntil,
           })
           .where(eq(users.id, user.id));
       }
@@ -62,7 +84,10 @@ export class AuthService {
         entityType: 'user',
         entityId: user?.id ?? null,
         outcome: 'failure',
-        metadata: { reason: !user ? 'unknown_user' : !user.isActive ? 'inactive' : 'bad_password', email: input.email },
+        metadata: {
+          reason: !user ? 'unknown_user' : !user.isActive ? 'inactive' : 'bad_password',
+          email: input.email,
+        },
       });
       throw new UnauthorizedException({ title: GENERIC_LOGIN_ERROR });
     }
@@ -72,7 +97,9 @@ export class AuthService {
       .set({ failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() })
       .where(eq(users.id, user.id));
     // Housekeeping: drop expired refresh tokens for this user.
-    await this.db.delete(refreshTokens).where(and(eq(refreshTokens.userId, user.id), lt(refreshTokens.expiresAt, new Date())));
+    await this.db
+      .delete(refreshTokens)
+      .where(and(eq(refreshTokens.userId, user.id), lt(refreshTokens.expiresAt, new Date())));
 
     const refreshToken = await this.issueRefreshToken(user.id, randomUUID(), client);
     await this.audit.record(actor, { action: 'auth.login', entityType: 'user', entityId: user.id });
@@ -85,16 +112,26 @@ export class AuthService {
    */
   async refresh(raw: string | undefined, client: ClientInfo) {
     if (!raw) throw new UnauthorizedException({ title: 'No session' });
-    const [token] = await this.db.select().from(refreshTokens).where(eq(refreshTokens.tokenHash, sha256(raw))).limit(1);
+    const [token] = await this.db
+      .select()
+      .from(refreshTokens)
+      .where(eq(refreshTokens.tokenHash, sha256(raw)))
+      .limit(1);
     if (!token) throw new UnauthorizedException({ title: 'Invalid session' });
     if (token.revokedAt) {
       await this.db
         .update(refreshTokens)
         .set({ revokedAt: new Date() })
         .where(and(eq(refreshTokens.familyId, token.familyId), isNull(refreshTokens.revokedAt)));
-      await this.audit.record({ id: token.userId, email: '', ...client }, {
-        action: 'auth.refresh_reuse_detected', entityType: 'user', entityId: token.userId, outcome: 'failure',
-      });
+      await this.audit.record(
+        { id: token.userId, email: '', ...client },
+        {
+          action: 'auth.refresh_reuse_detected',
+          entityType: 'user',
+          entityId: token.userId,
+          outcome: 'failure',
+        },
+      );
       throw new UnauthorizedException({ title: 'Session revoked' });
     }
     if (token.expiresAt < new Date()) throw new UnauthorizedException({ title: 'Session expired' });
@@ -127,45 +164,85 @@ export class AuthService {
 
   async logout(raw: string | undefined, actor: ClientInfo) {
     if (!raw) return;
-    const [token] = await this.db.select().from(refreshTokens).where(eq(refreshTokens.tokenHash, sha256(raw))).limit(1);
+    const [token] = await this.db
+      .select()
+      .from(refreshTokens)
+      .where(eq(refreshTokens.tokenHash, sha256(raw)))
+      .limit(1);
     if (!token) return;
     await this.db
       .update(refreshTokens)
       .set({ revokedAt: new Date() })
       .where(and(eq(refreshTokens.familyId, token.familyId), isNull(refreshTokens.revokedAt)));
-    await this.audit.record({ id: token.userId, email: '', ...actor }, { action: 'auth.logout', entityType: 'user', entityId: token.userId });
+    await this.audit.record(
+      { id: token.userId, email: '', ...actor },
+      { action: 'auth.logout', entityType: 'user', entityId: token.userId },
+    );
   }
 
   async me(userId: string): Promise<SessionUser> {
     const p = await this.loader.load(userId);
     if (!p) throw new UnauthorizedException();
     return {
-      id: p.id, email: p.email, fullNameEn: p.fullNameEn, fullNameAr: p.fullNameAr, locale: p.locale,
-      institutionId: p.institutionId, roles: p.roles, permissions: p.permissions,
+      id: p.id,
+      email: p.email,
+      fullNameEn: p.fullNameEn,
+      fullNameAr: p.fullNameAr,
+      locale: p.locale,
+      institutionId: p.institutionId,
+      roles: p.roles,
+      permissions: p.permissions,
     };
   }
 
   async changePassword(user: RequestUser, input: ChangePasswordInput) {
     const [row] = await this.db.select().from(users).where(eq(users.id, user.id)).limit(1);
     if (!(await this.passwords.verify(row?.passwordHash, input.currentPassword))) {
-      await this.audit.record(user, { action: 'auth.password_change', entityType: 'user', entityId: user.id, outcome: 'failure' });
-      throw businessRule('Current password is incorrect', [{ path: 'currentPassword', message: 'Incorrect password' }]);
+      await this.audit.record(user, {
+        action: 'auth.password_change',
+        entityType: 'user',
+        entityId: user.id,
+        outcome: 'failure',
+      });
+      throw businessRule('Current password is incorrect', [
+        { path: 'currentPassword', message: 'Incorrect password' },
+      ]);
     }
     if (input.newPassword.toLowerCase().includes(user.email.split('@')[0].toLowerCase())) {
-      throw businessRule('Password must not contain your user name', [{ path: 'newPassword', message: 'Contains user name' }]);
+      throw businessRule('Password must not contain your user name', [
+        { path: 'newPassword', message: 'Contains user name' },
+      ]);
     }
     const passwordHash = await this.passwords.hash(input.newPassword);
     await this.db.transaction(async (tx) => {
-      await tx.update(users).set({ passwordHash, passwordChangedAt: new Date(), updatedAt: new Date() }).where(eq(users.id, user.id));
+      await tx
+        .update(users)
+        .set({ passwordHash, passwordChangedAt: new Date(), updatedAt: new Date() })
+        .where(eq(users.id, user.id));
       // Changing the password ends every other session.
-      await tx.update(refreshTokens).set({ revokedAt: new Date() }).where(and(eq(refreshTokens.userId, user.id), isNull(refreshTokens.revokedAt)));
-      await this.audit.record(user, { action: 'auth.password_change', entityType: 'user', entityId: user.id }, tx);
+      await tx
+        .update(refreshTokens)
+        .set({ revokedAt: new Date() })
+        .where(and(eq(refreshTokens.userId, user.id), isNull(refreshTokens.revokedAt)));
+      await this.audit.record(
+        user,
+        { action: 'auth.password_change', entityType: 'user', entityId: user.id },
+        tx,
+      );
     });
   }
 
   async updateProfile(user: RequestUser, input: UpdateProfileInput): Promise<SessionUser> {
-    await this.db.update(users).set({ ...input, updatedAt: new Date() }).where(eq(users.id, user.id));
-    await this.audit.record(user, { action: 'user.profile_update', entityType: 'user', entityId: user.id, metadata: { fields: Object.keys(input) } });
+    await this.db
+      .update(users)
+      .set({ ...input, updatedAt: new Date() })
+      .where(eq(users.id, user.id));
+    await this.audit.record(user, {
+      action: 'user.profile_update',
+      entityType: 'user',
+      entityId: user.id,
+      metadata: { fields: Object.keys(input) },
+    });
     return this.me(user.id);
   }
 
@@ -186,7 +263,12 @@ export class AuthService {
     const user = await this.me(userId);
     const accessToken = await this.jwt.signAsync(
       { sub: userId },
-      { expiresIn: this.env.ACCESS_TOKEN_TTL_SECONDS, audience: 'cdms-api', issuer: 'cdms', algorithm: 'HS256' },
+      {
+        expiresIn: this.env.ACCESS_TOKEN_TTL_SECONDS,
+        audience: 'cdms-api',
+        issuer: 'cdms',
+        algorithm: 'HS256',
+      },
     );
     return { accessToken, expiresIn: this.env.ACCESS_TOKEN_TTL_SECONDS, user };
   }

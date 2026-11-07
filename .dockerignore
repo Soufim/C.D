@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/coverage
+**/.env
+**/.env.*
+**/storage
+**/storage-test
+**/test-results
+**/playwright-report
+.git
+backups

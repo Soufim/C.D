@@ -11,7 +11,10 @@ import { loadEnv } from './config/env';
 /** Builds the configured application (shared by main.ts and integration tests). */
 export async function createApp(opts: { logger?: boolean } = {}): Promise<INestApplication> {
   const env = loadEnv();
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true, logger: opts.logger === false ? false : undefined });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bufferLogs: true,
+    logger: opts.logger === false ? false : undefined,
+  });
   if (opts.logger !== false) app.useLogger(app.get(Logger));
   if (env.TRUST_PROXY) app.set('trust proxy', 1);
   app.disable('x-powered-by');
@@ -23,7 +26,12 @@ export async function createApp(opts: { logger?: boolean } = {}): Promise<INestA
   );
   app.use(cookieParser());
   app.useBodyParser('json', { limit: '2mb' });
-  app.enableCors({ origin: env.CORS_ORIGINS, credentials: true, methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'], maxAge: 600 });
+  app.enableCors({
+    origin: env.CORS_ORIGINS,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+    maxAge: 600,
+  });
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI, defaultVersion: '1' });
   app.enableShutdownHooks();
@@ -31,7 +39,9 @@ export async function createApp(opts: { logger?: boolean } = {}): Promise<INestA
   if (env.NODE_ENV !== 'production') {
     const config = new DocumentBuilder()
       .setTitle('CDMS API')
-      .setDescription('Curriculum Development & Management System — REST API (OpenAPI 3). Errors use RFC 9457 problem+json.')
+      .setDescription(
+        'Curriculum Development & Management System — REST API (OpenAPI 3). Errors use RFC 9457 problem+json.',
+      )
       .setVersion('1.0')
       .addBearerAuth()
       .build();

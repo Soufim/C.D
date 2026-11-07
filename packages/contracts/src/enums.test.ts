@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { availableActions, curriculumSchema, templateSchema } from './index';
+import {
+  availableActions,
+  curriculumSchema,
+  templateSchema,
+  updateCurriculumSchema,
+  updateUnitSchema,
+} from './index';
 
 describe('workflow', () => {
   it('only allows submit/archive from draft', () => {
@@ -12,16 +18,31 @@ describe('workflow', () => {
 
 describe('schemas', () => {
   it('rejects invalid codes', () => {
-    expect(curriculumSchema.safeParse({ code: 'bad code', titleEn: 'x', titleAr: 'س' }).success).toBe(false);
+    expect(
+      curriculumSchema.safeParse({ code: 'bad code', titleEn: 'x', titleAr: 'س' }).success,
+    ).toBe(false);
   });
   it('rejects duplicate template section keys', () => {
     const r = templateSchema.safeParse({
-      code: 'T1', nameEn: 'T', nameAr: 'ت', kind: 'curriculum',
+      code: 'T1',
+      nameEn: 'T',
+      nameAr: 'ت',
+      kind: 'curriculum',
       sections: [
         { key: 'a', titleEn: 'A', titleAr: 'أ' },
         { key: 'a', titleEn: 'B', titleAr: 'ب' },
       ],
     });
     expect(r.success).toBe(false);
+  });
+});
+
+describe('patch schemas', () => {
+  it('do not inject defaults for omitted fields', () => {
+    expect(updateUnitSchema.parse({ titleEn: 'x', rowVersion: 1 })).toEqual({
+      titleEn: 'x',
+      rowVersion: 1,
+    });
+    expect(updateCurriculumSchema.parse({ rowVersion: 0 })).toEqual({ rowVersion: 0 });
   });
 });

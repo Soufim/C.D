@@ -1,4 +1,17 @@
-import { BadRequestException, Controller, Delete, Get, HttpCode, Param, Post, Query, Res, StreamableFile, UploadedFile, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Query,
+  Res,
+  StreamableFile,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
@@ -18,22 +31,37 @@ export class FilesController {
   @Post(':entityType/:entityId')
   @RequirePermissions(PERMISSIONS.FILE_UPLOAD)
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5 } }))
-  upload(@Param('entityType') type: string, @Param('entityId') id: string, @UploadedFile() file: Express.Multer.File, @CurrentUser() u: RequestUser) {
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: MAX_UPLOAD_BYTES, files: 1, fields: 5 } }),
+  )
+  upload(
+    @Param('entityType') type: string,
+    @Param('entityId') id: string,
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() u: RequestUser,
+  ) {
     if (!UUID.test(id)) throw new BadRequestException('Invalid id');
     return this.svc.upload(file, type, id, u);
   }
 
   @Get()
   @Authenticated()
-  list(@Query('entityType') type: string, @Query('entityId') id: string, @CurrentUser() u: RequestUser) {
+  list(
+    @Query('entityType') type: string,
+    @Query('entityId') id: string,
+    @CurrentUser() u: RequestUser,
+  ) {
     if (!UUID.test(id ?? '')) throw new BadRequestException('Invalid id');
     return this.svc.list(type, id, u);
   }
 
   @Get(':id/content')
   @Authenticated()
-  async download(@IdParam() id: string, @CurrentUser() u: RequestUser, @Res({ passthrough: true }) res: Response) {
+  async download(
+    @IdParam() id: string,
+    @CurrentUser() u: RequestUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const { meta, stream } = await this.svc.open(id, u);
     res.set({
       'Content-Type': meta.mimeType,

@@ -1,0 +1,90 @@
+# Quality gate for every push / pull request. Uses only free, open-source tooling; the same
+# checks run locally with ./scripts/verify.sh (or on a self-hosted Gitea/GitLab runner).
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: cdms, POSTGRES_PASSWORD: cdms, POSTGRES_DB: cdms }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cdms" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://cdms:cdms@localhost:5432/cdms_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - name: Migrations match schema
+        working-directory: apps/api
+        run: npx drizzle-kit check
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
+
+  e2e:
+    runs-on: ubuntu-24.04
+    needs: verify
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: cdms, POSTGRES_PASSWORD: cdms, POSTGRES_DB: cdms }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U cdms" --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://cdms:cdms@localhost:5432/cdms
+      JWT_ACCESS_SECRET: ci-only-secret-ci-only-secret-ci-only-1234
+      SEED_ADMIN_PASSWORD: Admin-Passw0rd-2026
+      SEED_DEMO_PASSWORD: Demo-Passw0rd-2026
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build -w @cdms/contracts && npm run build -w @cdms/api
+      - run: npm run db:migrate && npm run db:seed
+      - name: Start API and web
+        run: |
+          (cd apps/api && node dist/main.js &)
+          (cd apps/web && npx vite --port 5173 --strictPort &)
+          npx --yes wait-on@8.0.1 http://localhost:3000/api/v1/health/ready http://localhost:5173
+      - run: npm run e2e -w @cdms/web -- --trace off
+
+  images:
+    runs-on: ubuntu-24.04
+    needs: verify
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose build
+        env: { POSTGRES_PASSWORD: build-only, JWT_ACCESS_SECRET: build-only }
+      - name: Scan images (Trivy, open source)
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: cdms/api:latest
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'

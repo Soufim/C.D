@@ -34,12 +34,17 @@ export class AuthGuard implements CanActivate {
 
     let payload: { sub: string };
     try {
-      payload = await this.jwt.verifyAsync(token, { algorithms: ['HS256'], audience: 'cdms-api', issuer: 'cdms' });
+      payload = await this.jwt.verifyAsync(token, {
+        algorithms: ['HS256'],
+        audience: 'cdms-api',
+        issuer: 'cdms',
+      });
     } catch {
       throw new UnauthorizedException({ title: 'Invalid or expired token' });
     }
     const principal = await this.loader.load(payload.sub);
-    if (!principal || !principal.isActive) throw new UnauthorizedException({ title: 'Account disabled' });
+    if (!principal || !principal.isActive)
+      throw new UnauthorizedException({ title: 'Account disabled' });
 
     req.user = {
       id: principal.id,

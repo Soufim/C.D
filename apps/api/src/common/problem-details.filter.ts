@@ -1,13 +1,25 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import type { ProblemDetails } from '@cdms/contracts';
 
 const PG_ERRORS: Record<string, { status: number; title: string; detail: string }> = {
-  '23505': { status: 409, title: 'Duplicate', detail: 'A record with the same code already exists.' },
+  '23505': {
+    status: 409,
+    title: 'Duplicate',
+    detail: 'A record with the same code already exists.',
+  },
   '23503': {
     status: 409,
     title: 'Record in use',
-    detail: 'This record is referenced by other records and cannot be removed or the referenced record does not exist.',
+    detail:
+      'This record is referenced by other records and cannot be removed or the referenced record does not exist.',
   },
   '23514': { status: 422, title: 'Invalid data', detail: 'The data violates a database rule.' },
   '22P02': { status: 400, title: 'Invalid input', detail: 'Malformed value.' },
@@ -28,7 +40,8 @@ export class ProblemDetailsFilter implements ExceptionFilter {
     const traceId = String(req.id ?? '');
     let body: ProblemDetails;
 
-    const pgCode = (exception as { code?: string; cause?: { code?: string } })?.cause?.code ??
+    const pgCode =
+      (exception as { code?: string; cause?: { code?: string } })?.cause?.code ??
       (exception as { code?: string })?.code;
 
     if (exception instanceof HttpException) {
@@ -39,7 +52,8 @@ export class ProblemDetailsFilter implements ExceptionFilter {
         type: (obj.type as string) ?? 'about:blank',
         title: (obj.title as string) ?? HttpStatus[status] ?? 'Error',
         status,
-        detail: (obj.detail as string) ?? (typeof obj.message === 'string' ? obj.message : undefined),
+        detail:
+          (obj.detail as string) ?? (typeof obj.message === 'string' ? obj.message : undefined),
         errors: obj.errors as ProblemDetails['errors'],
       };
     } else if (pgCode && PG_ERRORS[pgCode]) {
@@ -47,7 +61,12 @@ export class ProblemDetailsFilter implements ExceptionFilter {
       body = { type: `urn:cdms:db:${pgCode}`, ...m };
     } else {
       this.logger.error({ err: exception, traceId }, 'Unhandled error');
-      body = { type: 'about:blank', title: 'Internal Server Error', status: 500, detail: 'An unexpected error occurred.' };
+      body = {
+        type: 'about:blank',
+        title: 'Internal Server Error',
+        status: 500,
+        detail: 'An unexpected error occurred.',
+      };
     }
     body.instance = req.originalUrl?.split('?')[0];
     body.traceId = traceId || undefined;

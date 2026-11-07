@@ -33,21 +33,25 @@ export function useListParams(defaults: Partial<ListParams> = {}) {
 
   const set = useCallback(
     (patch: Partial<ListParams>, resetPage = true) => {
-      setSp((prev) => {
-        const next = new URLSearchParams(prev);
-        for (const [k, v] of Object.entries(patch)) {
-          if (v === undefined || v === '' || v === null) next.delete(k);
-          else next.set(k, String(v));
-        }
-        if (resetPage && !('page' in patch)) next.delete('page');
-        return next;
-      }, { replace: true });
+      setSp(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          for (const [k, v] of Object.entries(patch)) {
+            if (v === undefined || v === '' || v === null) next.delete(k);
+            else next.set(k, String(v));
+          }
+          if (resetPage && !('page' in patch)) next.delete('page');
+          return next;
+        },
+        { replace: true },
+      );
     },
     [setSp],
   );
 
   const toggleSort = useCallback(
-    (key: string) => set({ sort: key, order: params.sort === key && params.order === 'asc' ? 'desc' : 'asc' }),
+    (key: string) =>
+      set({ sort: key, order: params.sort === key && params.order === 'asc' ? 'desc' : 'asc' }),
     [params.sort, params.order, set],
   );
 

@@ -3,7 +3,10 @@ import type { Permission } from './permissions';
 import type { Locale } from './enums';
 
 export const loginSchema = z.object({
-  email: z.email().max(254).transform((v) => v.toLowerCase()),
+  email: z
+    .email()
+    .max(254)
+    .transform((v) => v.toLowerCase()),
   password: z.string().min(1).max(256),
 });
 export type LoginInput = z.infer<typeof loginSchema>;

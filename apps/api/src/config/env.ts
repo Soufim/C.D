@@ -20,7 +20,12 @@ const envSchema = z
     CORS_ORIGINS: z
       .string()
       .default('http://localhost:5173')
-      .transform((v) => v.split(',').map((s) => s.trim()).filter(Boolean)),
+      .transform((v) =>
+        v
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ),
     TRUST_PROXY: bool.default(false),
     LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
     DATABASE_URL: z.string().min(1),
@@ -41,9 +46,17 @@ const envSchema = z
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production') {
       if (env.JWT_ACCESS_SECRET.startsWith('change-me'))
-        ctx.addIssue({ code: 'custom', path: ['JWT_ACCESS_SECRET'], message: 'Default secret in production' });
+        ctx.addIssue({
+          code: 'custom',
+          path: ['JWT_ACCESS_SECRET'],
+          message: 'Default secret in production',
+        });
       if (!env.COOKIE_SECURE)
-        ctx.addIssue({ code: 'custom', path: ['COOKIE_SECURE'], message: 'Must be 1 in production (HTTPS)' });
+        ctx.addIssue({
+          code: 'custom',
+          path: ['COOKIE_SECURE'],
+          message: 'Must be 1 in production (HTTPS)',
+        });
     }
   });
 

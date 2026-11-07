@@ -43,15 +43,34 @@ export class FilesService implements OnModuleInit {
   }
 
   private dto(f: typeof files.$inferSelect, uploader?: string | null): FileDto {
-    return { id: f.id, originalName: f.originalName, mimeType: f.mimeType, sizeBytes: f.sizeBytes, sha256: f.sha256, entityType: f.entityType, entityId: f.entityId, uploadedById: f.uploadedById, uploadedByName: uploader, createdAt: iso(f.createdAt)! };
+    return {
+      id: f.id,
+      originalName: f.originalName,
+      mimeType: f.mimeType,
+      sizeBytes: f.sizeBytes,
+      sha256: f.sha256,
+      entityType: f.entityType,
+      entityId: f.entityId,
+      uploadedById: f.uploadedById,
+      uploadedByName: uploader,
+      createdAt: iso(f.createdAt)!,
+    };
   }
 
-  async upload(file: Express.Multer.File | undefined, entityType: string, entityId: string, user: RequestUser): Promise<FileDto> {
+  async upload(
+    file: Express.Multer.File | undefined,
+    entityType: string,
+    entityId: string,
+    user: RequestUser,
+  ): Promise<FileDto> {
     if (!file) throw businessRule('No file provided');
     const policy = ATTACHABLE[entityType];
     if (!policy) throw businessRule('Files cannot be attached to this record type');
     if (!user.permissions.has(policy.write)) throw forbidden();
-    const v = validateUpload(Buffer.from(file.originalname, 'latin1').toString('utf8'), file.buffer);
+    const v = validateUpload(
+      Buffer.from(file.originalname, 'latin1').toString('utf8'),
+      file.buffer,
+    );
     if (typeof v === 'string') throw businessRule(v, [{ path: 'file', message: v }]);
 
     const now = new Date();
@@ -63,8 +82,34 @@ export class FilesService implements OnModuleInit {
     const sha256 = createHash('sha256').update(file.buffer).digest('hex');
 
     return this.db.transaction(async (tx) => {
-      const [f] = await tx.insert(files).values({ originalName: v.safeName, mimeType: v.mimeType, sizeBytes: file.size, sha256, storageKey: key, entityType, entityId, uploadedById: user.id }).returning();
-      await this.audit.record(user, { action: 'file.upload', entityType: 'file', entityId: f.id, metadata: { name: v.safeName, size: file.size, sha256, attachedTo: { entityType, entityId } } }, tx);
+      const [f] = await tx
+        .insert(files)
+        .values({
+          originalName: v.safeName,
+          mimeType: v.mimeType,
+          sizeBytes: file.size,
+          sha256,
+          storageKey: key,
+          entityType,
+          entityId,
+          uploadedById: user.id,
+        })
+        .returning();
+      await this.audit.record(
+        user,
+        {
+          action: 'file.upload',
+          entityType: 'file',
+          entityId: f.id,
+          metadata: {
+            name: v.safeName,
+            size: file.size,
+            sha256,
+            attachedTo: { entityType, entityId },
+          },
+        },
+        tx,
+      );
       return this.dto(f);
     });
   }
@@ -72,13 +117,26 @@ export class FilesService implements OnModuleInit {
   async list(entityType: string, entityId: string, user: RequestUser): Promise<FileDto[]> {
     const policy = ATTACHABLE[entityType];
     if (!policy || !user.permissions.has(policy.read)) throw forbidden();
-    const rows = await this.db.select({ f: files, name: users.fullNameEn }).from(files).leftJoin(users, eq(users.id, files.uploadedById))
-      .where(and(eq(files.entityType, entityType), eq(files.entityId, entityId), isNull(files.deletedAt))).orderBy(desc(files.createdAt));
+    const rows = await this.db
+      .select({ f: files, name: users.fullNameEn })
+      .from(files)
+      .leftJoin(users, eq(users.id, files.uploadedById))
+      .where(
+        and(
+          eq(files.entityType, entityType),
+          eq(files.entityId, entityId),
+          isNull(files.deletedAt),
+        ),
+      )
+      .orderBy(desc(files.createdAt));
     return rows.map((r) => this.dto(r.f, r.name));
   }
 
   async open(id: string, user: RequestUser) {
-    const [f] = await this.db.select().from(files).where(and(eq(files.id, id), isNull(files.deletedAt)));
+    const [f] = await this.db
+      .select()
+      .from(files)
+      .where(and(eq(files.id, id), isNull(files.deletedAt)));
     if (!f) throw notFound('File');
     const policy = f.entityType ? ATTACHABLE[f.entityType] : undefined;
     if (!policy || !user.permissions.has(policy.read)) throw notFound('File');
@@ -88,13 +146,25 @@ export class FilesService implements OnModuleInit {
 
   /** Soft delete: content is kept until the retention job/backup policy removes it. */
   async remove(id: string, user: RequestUser) {
-    const [f] = await this.db.select().from(files).where(and(eq(files.id, id), isNull(files.deletedAt)));
+    const [f] = await this.db
+      .select()
+      .from(files)
+      .where(and(eq(files.id, id), isNull(files.deletedAt)));
     if (!f) throw notFound('File');
     const policy = f.entityType ? ATTACHABLE[f.entityType] : undefined;
     if (!policy || !user.permissions.has(policy.write)) throw forbidden();
     await this.db.transaction(async (tx) => {
       await tx.update(files).set({ deletedAt: new Date() }).where(eq(files.id, id));
-      await this.audit.record(user, { action: 'file.delete', entityType: 'file', entityId: id, metadata: { name: f.originalName } }, tx);
+      await this.audit.record(
+        user,
+        {
+          action: 'file.delete',
+          entityType: 'file',
+          entityId: id,
+          metadata: { name: f.originalName },
+        },
+        tx,
+      );
     });
   }
 

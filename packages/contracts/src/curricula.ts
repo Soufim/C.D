@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { code, optionalText, rowVersion, textAr, textEn, uuid } from './common';
+import { code, optionalText, patchSchema, rowVersion, textAr, textEn, uuid } from './common';
 import type { BaseRecord, LinkedRef } from './common';
 import type { RecordStatus } from './enums';
 
@@ -25,7 +25,7 @@ export const curriculumSchema = z.object({
     .default({}),
 });
 export type CurriculumInput = z.infer<typeof curriculumSchema>;
-export const updateCurriculumSchema = curriculumSchema.partial().extend({ rowVersion });
+export const updateCurriculumSchema = patchSchema(curriculumSchema.shape);
 
 export const curriculumUnitSchema = z.object({
   unitId: uuid,

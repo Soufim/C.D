@@ -3,5 +3,9 @@ import { WorkflowController } from './workflow.controller';
 import { WorkflowService } from './workflow.service';
 
 @Global()
-@Module({ controllers: [WorkflowController], providers: [WorkflowService], exports: [WorkflowService] })
+@Module({
+  controllers: [WorkflowController],
+  providers: [WorkflowService],
+  exports: [WorkflowService],
+})
 export class WorkflowModule {}
