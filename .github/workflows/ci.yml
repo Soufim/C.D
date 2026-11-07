@@ -29,7 +29,7 @@ jobs:
       TEST_DATABASE_URL: postgres://cdms:cdms@localhost:5432/cdms_test
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
       - run: npm ci --no-audit --no-fund
       - run: npm run format:check
@@ -61,7 +61,7 @@ jobs:
       SEED_DEMO_PASSWORD: Demo-Passw0rd-2026
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
       - run: npm ci --no-audit --no-fund
       - run: npx playwright install --with-deps chromium
