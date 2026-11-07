@@ -28,8 +28,8 @@ jobs:
     env:
       TEST_DATABASE_URL: postgres://cdms:cdms@localhost:5432/cdms_test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
       - run: npm ci --no-audit --no-fund
       - run: npm run format:check
@@ -60,11 +60,12 @@ jobs:
       SEED_ADMIN_PASSWORD: Admin-Passw0rd-2026
       SEED_DEMO_PASSWORD: Demo-Passw0rd-2026
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
       - run: npm ci --no-audit --no-fund
-      - run: npx playwright install --with-deps chromium
+      # Run from the web workspace that owns @playwright/test (npm may not hoist its bin).
+      - run: npm exec -w @cdms/web -- playwright install --with-deps chromium
       - run: npm run build -w @cdms/contracts && npm run build -w @cdms/api
       - run: npm run db:migrate && npm run db:seed
       - name: Start API and web
@@ -78,13 +79,20 @@ jobs:
     runs-on: ubuntu-24.04
     needs: verify
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - run: docker compose build
         env: { POSTGRES_PASSWORD: build-only, JWT_ACCESS_SECRET: build-only }
-      - name: Scan images (Trivy, open source)
+      - name: Scan API image (Trivy, open source)
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: cdms/api:latest
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Scan web image (Trivy, open source)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: cdms/web:latest
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: '1'
