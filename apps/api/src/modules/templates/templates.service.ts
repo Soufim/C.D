@@ -12,7 +12,7 @@ import { allOf, countAll, defined, diff, iso, orderBy, paginated, searchFilter }
 import { notFound } from '../../common/errors';
 
 type Row = typeof templates.$inferSelect;
-const usage = sql<number>`(select count(*)::int from curricula c where c.template_id = ${templates.id})`;
+const usage = sql<number>`(select count(*)::int from curricula c where c.template_id = "templates"."id")`;
 
 export const templateDto = (r: Row, usageCount?: number): TemplateDto => ({
   id: r.id, code: r.code, nameEn: r.nameEn, nameAr: r.nameAr, descriptionEn: r.descriptionEn, descriptionAr: r.descriptionAr,

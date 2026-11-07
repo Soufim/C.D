@@ -35,7 +35,7 @@ export class ReferenceDataService {
 
   async lists(q: ListQuery): Promise<Paginated<ReferenceListDto>> {
     const where = allOf(searchFilter(q.q, [referenceLists.code, referenceLists.nameEn, referenceLists.nameAr]));
-    const count = sql<number>`(select count(*)::int from ${referenceItems} where ${referenceItems.listId} = ${referenceLists.id})`;
+    const count = sql<number>`(select count(*)::int from reference_items ri where ri.list_id = "reference_lists"."id")`;
     const [rows, [{ total }]] = await Promise.all([
       this.db.select({ l: referenceLists, count }).from(referenceLists).where(where).orderBy(asc(referenceLists.code)).limit(q.pageSize).offset((q.page - 1) * q.pageSize),
       this.db.select({ total: countAll }).from(referenceLists).where(where),

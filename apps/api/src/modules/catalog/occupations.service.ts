@@ -48,7 +48,7 @@ export class OccupationsService {
   }
 
   async list(q: OccupationListQuery): Promise<Paginated<OccupationDto>> {
-    const childCount = sql<number>`(select count(*)::int from occupations c where c.parent_id = ${occupations.id})`;
+    const childCount = sql<number>`(select count(*)::int from occupations c where c.parent_id = "occupations"."id")`;
     const where = allOf(
       searchFilter(q.q, [occupations.code, occupations.titleEn, occupations.titleAr, occupations.iscoCode]),
       q.status ? eq(occupations.status, q.status) : undefined,

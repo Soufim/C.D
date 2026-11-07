@@ -1,0 +1,143 @@
+{
+  "app": { "name": "CDMS", "fullName": "Curriculum Development System", "ministry": "Technical Education & TVET", "skip": "Skip to main content" },
+  "nav": {
+    "dashboard": "Dashboard", "curricula": "Curricula", "reviews": "Review queue", "standards": "Standards catalogue",
+    "occupations": "Occupations", "competencies": "Competencies", "units": "Units", "frameworks": "Qualification frameworks",
+    "templates": "Templates", "data": "Data", "referenceData": "Reference data", "institutions": "Institutions",
+    "importExport": "Import & export", "reports": "Reports", "admin": "Administration", "users": "Users", "roles": "Roles & permissions",
+    "audit": "Audit log", "settings": "Settings", "designSystem": "Design system", "menu": "Menu", "closeMenu": "Close menu"
+  },
+  "common": {
+    "search": "Search", "searchPlaceholder": "Search by code or title…", "create": "Create", "new": "New", "edit": "Edit", "save": "Save", "saveChanges": "Save changes",
+    "cancel": "Cancel", "close": "Close", "delete": "Delete", "remove": "Remove", "confirm": "Confirm", "back": "Back", "actions": "Actions",
+    "loading": "Loading…", "retry": "Try again", "noResults": "No results", "all": "All", "yes": "Yes", "no": "No", "optional": "optional",
+    "required": "required", "code": "Code", "title": "Title", "name": "Name", "titleEn": "Title (English)", "titleAr": "Title (Arabic)",
+    "nameEn": "Name (English)", "nameAr": "Name (Arabic)", "descriptionEn": "Description (English)", "descriptionAr": "Description (Arabic)",
+    "description": "Description", "status": "Status", "updated": "Updated", "created": "Created", "type": "Type", "level": "Level",
+    "details": "Details", "overview": "Overview", "history": "History", "files": "Files", "filters": "Filters", "clearFilters": "Clear filters",
+    "page": "Page {{page}} of {{pages}}", "showing": "{{from}}–{{to}} of {{total}}", "previous": "Previous", "next": "Next",
+    "rowsPerPage": "Rows per page", "add": "Add", "link": "Link", "unlink": "Unlink", "open": "Open", "view": "View", "download": "Download",
+    "upload": "Upload", "export": "Export", "import": "Import", "print": "Print", "active": "Active", "inactive": "Inactive",
+    "english": "English", "arabic": "العربية", "language": "Language", "theme": "Theme", "light": "Light", "dark": "Dark", "system": "System",
+    "notifications": "Notifications", "markAllRead": "Mark all as read", "noNotifications": "You're all caught up", "signOut": "Sign out",
+    "profile": "Profile", "hours": "Hours", "credits": "Credits", "term": "Term", "version": "Version", "selected": "{{count}} selected",
+    "copied": "Copied", "readOnly": "Read only", "lockedNotice": "This record is {{status}} and can no longer be edited. Return it to draft or create a new version to make changes.",
+    "unsavedChanges": "You have unsaved changes", "sortBy": "Sort by {{field}}", "none": "None", "select": "Select…", "comment": "Comment", "reason": "Reason",
+    "moreActions": "More actions", "viewAll": "View all", "both": "Both languages"
+  },
+  "status": { "draft": "Draft", "in_review": "In review", "approved": "Approved", "published": "Published", "archived": "Archived" },
+  "workflow": {
+    "title": "Workflow", "submit": "Submit for review", "return": "Return for changes", "approve": "Approve", "publish": "Publish",
+    "archive": "Archive", "restore": "Restore to draft", "create": "Created", "new_version": "New version created",
+    "commentRequired": "Explain what needs to change", "commentOptional": "Add a comment (optional)",
+    "confirmTitle": "{{action}}?", "readiness": "Readiness checks", "ready": "Ready", "issues": "{{count}} issue(s) to resolve",
+    "warnings": "Warnings", "errors": "Must fix", "success": "Status changed to {{status}}", "noActions": "No actions available for your role.",
+    "fourEyes": "The person who submits a record cannot approve it.", "historyEmpty": "No workflow activity yet."
+  },
+  "errors": {
+    "generic": "Something went wrong", "network": "Unable to reach the server. Check your connection.", "notFound": "Not found",
+    "notFoundBody": "The record does not exist or you don't have access to it.", "forbidden": "You don't have permission to do this.",
+    "conflict": "Someone else changed this record. Reload to see their changes.", "reload": "Reload", "validation": "Please correct the highlighted fields.",
+    "pageNotFound": "Page not found", "goHome": "Go to dashboard"
+  },
+  "auth": {
+    "signIn": "Sign in", "email": "Email", "password": "Password", "welcome": "Sign in to manage curricula, standards and templates.",
+    "invalid": "Invalid email or password", "changePassword": "Change password", "currentPassword": "Current password",
+    "newPassword": "New password", "passwordHint": "At least 12 characters. A passphrase is easiest to remember.", "passwordChanged": "Password changed. Other sessions were signed out.",
+    "demoAccounts": "Demo accounts", "secureNotice": "Authorised Ministry personnel only. Activity is logged."
+  },
+  "dashboard": {
+    "greeting": "Welcome, {{name}}", "subtitle": "Overview of curriculum development and standardisation.", "pendingReviews": "Awaiting review",
+    "myDrafts": "My drafts", "curriculaByStatus": "Curricula by status", "recentActivity": "Recent activity", "catalogue": "Standards catalogue",
+    "quickActions": "Quick actions", "newCurriculum": "New curriculum", "openQueue": "Open review queue", "noActivity": "No recent activity."
+  },
+  "curricula": {
+    "title": "Curricula", "subtitle": "Design programmes from approved units, aligned to occupations and qualification levels.",
+    "new": "New curriculum", "edit": "Edit curriculum", "summaryEn": "Summary (English)", "summaryAr": "Summary (Arabic)",
+    "occupation": "Target occupation", "frameworkLevel": "Qualification level", "institution": "Owning institution", "template": "Template",
+    "programType": "Programme type", "duration": "Duration (months)", "effectiveFrom": "Effective from", "structure": "Structure",
+    "coverage": "Competency coverage", "sections": "Document sections", "units": "Units", "addUnits": "Add units", "editStructure": "Edit structure",
+    "noUnits": "No units yet", "noUnitsBody": "Add approved units to build the programme structure.", "totalHours": "Total hours",
+    "theory": "Theory", "practical": "Practical", "mandatory": "Mandatory", "elective": "Elective", "newVersion": "Create new version",
+    "newVersionBody": "A new draft version will be created from this curriculum. The current version stays published until the new one is published.",
+    "versions": "Versions", "coveragePercent": "{{percent}}% of required competencies covered", "required": "Required by occupation",
+    "covered": "Covered by", "notCovered": "Not covered", "additional": "Additional competencies", "noOccupation": "Select a target occupation to analyse coverage.",
+    "noTemplate": "Select a template to structure the curriculum document.", "sectionEmpty": "Not written yet", "editSections": "Edit sections",
+    "mine": "Created by me", "allVersions": "Show all versions", "deleteDraft": "Delete draft", "deleteBody": "This draft will be permanently deleted.",
+    "printView": "Print / PDF", "exportJson": "Export (JSON)", "created": "Curriculum created", "saved": "Curriculum saved", "termN": "Term {{n}}",
+    "empty": "No curricula yet", "emptyBody": "Create the first curriculum to get started."
+  },
+  "occupations": {
+    "title": "Occupations", "subtitle": "Occupational classification aligned with ISCO-08, and the competency profile of each occupation.",
+    "new": "New occupation", "edit": "Edit occupation", "parent": "Parent group", "isco": "ISCO-08 code", "sector": "Sector",
+    "profile": "Competency profile", "children": "Sub-groups and occupations", "tree": "Hierarchy", "table": "Table",
+    "noProfile": "No competencies linked", "addCompetencies": "Link competencies",
+    "levels": { "major_group": "Major group", "sub_major_group": "Sub-major group", "minor_group": "Minor group", "unit_group": "Unit group", "occupation": "Occupation" }
+  },
+  "competencies": {
+    "title": "Competencies", "subtitle": "Competency standards shared by occupations and units.", "new": "New competency", "edit": "Edit competency",
+    "criteriaEn": "Performance criteria (English)", "criteriaAr": "Performance criteria (Arabic)", "criteria": "Performance criteria",
+    "usedBy": "Used by", "types": { "core": "Core", "technical": "Technical", "generic": "Generic", "digital": "Digital", "entrepreneurial": "Entrepreneurial" }
+  },
+  "units": {
+    "title": "Units", "subtitle": "Reusable curriculum units with learning outcomes and linked competencies.", "new": "New unit", "edit": "Edit unit",
+    "learningOutcomes": "Learning outcomes", "addOutcome": "Add outcome", "outcomeEn": "Outcome (English)", "outcomeAr": "Outcome (Arabic)",
+    "creditHours": "Credit hours", "theoryHours": "Theory hours", "practicalHours": "Practical hours", "assessmentEn": "Assessment (English)",
+    "assessmentAr": "Assessment (Arabic)", "assessment": "Assessment", "competencies": "Linked competencies", "usedIn": "Used in curricula",
+    "noOutcomes": "No learning outcomes yet"
+  },
+  "frameworks": {
+    "title": "Qualification frameworks", "subtitle": "National qualification frameworks and level descriptors.", "new": "New framework",
+    "versionLabel": "Version", "levels": "Levels", "addLevel": "Add level", "level": "Level", "knowledge": "Knowledge", "skills": "Skills",
+    "autonomy": "Autonomy & responsibility", "knowledgeEn": "Knowledge (English)", "knowledgeAr": "Knowledge (Arabic)", "skillsEn": "Skills (English)",
+    "skillsAr": "Skills (Arabic)", "autonomyEn": "Autonomy (English)", "autonomyAr": "Autonomy (Arabic)"
+  },
+  "templates": {
+    "title": "Templates", "subtitle": "Standard document structures that curricula must follow.", "new": "New template", "edit": "Edit template",
+    "kind": "Kind", "kinds": { "curriculum": "Curriculum", "unit": "Unit", "document": "Document" }, "sections": "Sections",
+    "addSection": "Add section", "sectionKey": "Key", "guidanceEn": "Guidance (English)", "guidanceAr": "Guidance (Arabic)",
+    "requiredSection": "Required", "usage": "Used by {{count}} curricula", "noSections": "No sections defined", "moveUp": "Move up", "moveDown": "Move down"
+  },
+  "reference": {
+    "title": "Reference data", "subtitle": "Controlled lists used across the system. Codes are permanent; deactivate items instead of deleting them.",
+    "lists": "Lists", "items": "Items", "newList": "New list", "newItem": "New item", "labelEn": "Label (English)", "labelAr": "Label (Arabic)",
+    "sortOrder": "Sort order", "system": "System list", "selectList": "Select a list to manage its items."
+  },
+  "institutions": { "title": "Institutions", "subtitle": "Schools, colleges and directorates that own curricula.", "new": "New institution", "edit": "Edit institution", "type": "Institution type", "governorate": "Governorate", "address": "Address" },
+  "impact": {
+    "title": "Impact analysis", "body": "Changing or withdrawing this record affects the following linked records.", "none": "No other records depend on this one.",
+    "published": "{{count}} published", "check": "Check impact"
+  },
+  "link": { "title": "Link {{what}}", "search": "Search to add…", "linked": "Linked", "added": "Linked successfully", "removed": "Link removed", "confirmUnlink": "Remove this link?" },
+  "files": {
+    "title": "Attachments", "drop": "Drag a file here or choose one", "choose": "Choose file", "allowed": "PDF, Word, Excel, PowerPoint, CSV, TXT, PNG, JPG — up to 20 MB",
+    "uploaded": "File uploaded", "empty": "No attachments", "deleteConfirm": "Delete this file?", "by": "by {{name}}"
+  },
+  "import": {
+    "title": "Import & export", "subtitle": "Bulk-load reference and standards data, or export it for exchange and backup.",
+    "entity": "Data type", "format": "Format", "mode": "When a code already exists", "modeCreate": "Skip it", "modeUpsert": "Update it (drafts only)",
+    "listCode": "Reference list", "file": "File", "validate": "Validate (dry run)", "run": "Import", "template": "Download CSV template",
+    "result": "Result", "rows": "{{count}} rows", "createdN": "{{count}} created", "updatedN": "{{count}} updated", "skippedN": "{{count}} skipped",
+    "errorsN": "{{count}} errors", "rowError": "Row {{row}}", "dryRunOk": "Validation passed. Nothing was saved yet.", "done": "Import completed",
+    "failed": "Import rejected — nothing was saved. Fix the errors and try again.", "exportTitle": "Export", "exportFull": "Full catalogue (JSON)",
+    "draftsNote": "Imported records are created as drafts and follow the normal review workflow.",
+    "entities": { "occupation": "Occupations", "competency": "Competencies", "unit": "Units", "reference_item": "Reference items", "institution": "Institutions" }
+  },
+  "reviews": { "title": "Review queue", "subtitle": "Records submitted for review that you can act on.", "empty": "Nothing to review", "emptyBody": "Submitted records will appear here.", "submittedBy": "Submitted by {{name}}", "entity": "Record type" },
+  "reports": {
+    "title": "Standardisation report", "subtitle": "Gaps and inconsistencies in the standards catalogue.", "orphanCompetencies": "Competencies not used by any unit",
+    "orphanUnits": "Units not used in any curriculum", "noProfile": "Occupations without a competency profile", "statusMatrix": "Records by status", "entity": "Entity"
+  },
+  "admin": {
+    "users": "Users", "usersSubtitle": "Accounts, roles and institutional assignment.", "newUser": "New user", "editUser": "Edit user", "fullNameEn": "Full name (English)",
+    "fullNameAr": "Full name (Arabic)", "roles": "Roles", "institution": "Institution", "lastLogin": "Last sign-in", "never": "Never",
+    "resetPassword": "Reset password", "passwordReset": "Password reset. The user's sessions were signed out.", "deactivate": "Deactivate", "activate": "Activate",
+    "rolesTitle": "Roles & permissions", "rolesSubtitle": "Roles bundle permissions. The backend checks permissions, not role names.",
+    "newRole": "New role", "editRole": "Edit role", "permissions": "Permissions", "usersCount": "{{count}} users", "systemRole": "System role",
+    "audit": "Audit log", "auditSubtitle": "Append-only record of security-relevant and data-changing actions.", "actor": "User", "action": "Action",
+    "entity": "Record", "outcome": "Outcome", "when": "When", "ip": "IP address", "changes": "Changes", "success": "Success", "failure": "Failure",
+    "from": "From", "to": "To", "field": "Field", "before": "Before", "after": "After"
+  },
+  "settings": { "title": "Settings", "subtitle": "Your profile and preferences.", "profile": "Profile", "preferences": "Preferences", "security": "Security", "saved": "Settings saved", "languageHint": "Interface language. Content is always stored in both languages." },
+  "ds": { "title": "Design system", "subtitle": "Reference implementation of tokens, components and patterns. See docs/design-system.md." }
+}

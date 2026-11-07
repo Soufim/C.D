@@ -18,7 +18,7 @@ import { businessRule, forbidden, notFound } from '../../common/errors';
 import type { CurriculumListQuery } from './curricula.queries';
 
 type Row = typeof curricula.$inferSelect;
-const levelLabel = sql<string | null>`(select f.code || ' L' || l.level from framework_levels l join frameworks f on f.id = l.framework_id where l.id = ${curricula.frameworkLevelId})`;
+const levelLabel = sql<string | null>`(select f.code || ' L' || l.level from framework_levels l join frameworks f on f.id = l.framework_id where l.id = "curricula"."framework_level_id")`;
 
 const dto = (r: Row, extra: Partial<CurriculumDto> = {}): CurriculumDto => ({
   id: r.id, code: r.code, titleEn: r.titleEn, titleAr: r.titleAr, summaryEn: r.summaryEn, summaryAr: r.summaryAr,

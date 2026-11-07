@@ -13,7 +13,7 @@ import { ImpactService, linkedCompetencyCols } from './impact.service';
 import type { UnitListQuery } from './catalog.queries';
 
 type Row = typeof units.$inferSelect;
-const levelLabel = sql<string | null>`(select f.code || ' L' || l.level from framework_levels l join frameworks f on f.id = l.framework_id where l.id = ${units.frameworkLevelId})`;
+const levelLabel = sql<string | null>`(select f.code || ' L' || l.level from framework_levels l join frameworks f on f.id = l.framework_id where l.id = "units"."framework_level_id")`;
 
 const dto = (r: Row, extra: Partial<UnitDto> = {}): UnitDto => ({
   id: r.id, code: r.code, titleEn: r.titleEn, titleAr: r.titleAr, descriptionEn: r.descriptionEn, descriptionAr: r.descriptionAr,

@@ -48,8 +48,9 @@ export class CompetenciesService {
     });
   }
 
-  private levelLabelFor(col: typeof competencies.frameworkLevelId) {
-    return sql<string | null>`(select f.code || ' L' || l.level from framework_levels l join frameworks f on f.id = l.framework_id where l.id = ${col})`;
+  /** Correlated subquery — outer column is qualified explicitly (drizzle renders bare names). */
+  private levelLabelFor(_col: typeof competencies.frameworkLevelId) {
+    return sql<string | null>`(select f.code || ' L' || l.level from framework_levels l join frameworks f on f.id = l.framework_id where l.id = "competencies"."framework_level_id")`;
   }
 
   async list(q: CompetencyListQuery): Promise<Paginated<CompetencyDto>> {
